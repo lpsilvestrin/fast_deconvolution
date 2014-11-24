@@ -2,12 +2,11 @@ function deconvolved = fast_deconvolution_1d(img, kernel, weights)
 % deconvolve 1d image
 % step 1
 % finding derivatives
-sobelx = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]];
-sobely = [[1 2 1] [0 0 0] [-1 -2 -1]];
-dx = conv2(double(img), double(sobelx));
-dxx = conv2(dx, sobelx);
-dy = conv2(img, sobely);
-dyy = conv2(dy, sobely);
-dxy = conv2(dx, sobely);
-imshow(dx);
+dx = diff(img, 1, 2);
+dxx = diff(dx, 1, 2);
+dy = diff(img, 1, 1);
+dyy = diff(dy, 1, 1);
+dxy = diff(dx, 1, 1);
+size(dxy)
+imshow(uint8(dyy));
 d = [dx, dy, dxx, dyy, dxy];
