@@ -1,6 +1,8 @@
-function deconvolved = fast_deconvolution_1d(img, kernel, weights)
+function deconvolved = fast_deconvolution_1d(img, kernel)
 % deconvolve 1d image
 % step 1
+
+weights1 = [0.001 0.001 0.001 0.001 0.001];
 % finding derivatives
 dx = diff(img, 1, 2);
 dx = padarray(dx, [0,1], 0, 'post'); 
@@ -23,9 +25,17 @@ DXY = fft2(dxy);
 G = fft2(img);
 
 A = conj(H) .* H;
-A = A + weights(1)*conj(DX) .* DX;
-A = A + weights(2)*conj(DY) .* DY;
-A = A + weights(3)*conj(DXX) .* DXX;
-A = A + weights(4)*conj(DYY) .* DYY;
-A = A + weights(5)*conj(DXY) .* DXY;
-B = conj(H) .* G; % B is just HC .* G since Ws = 0
+A = A + weights1(1)*conj(DX) .* DX;
+A = A + weights1(2)*conj(DY) .* DY;
+A = A + weights1(3)*conj(DXX) .* DXX;
+A = A + weights1(4)*conj(DYY) .* DYY;
+A = A + weights1(5)*conj(DXY) .* DXY;
+B = conj(H) .* G; % B is just H .* G since Ws = 0
+
+f1 = ifft2(B ./ A);
+deconvolved = f1;
+
+% step 2: edge-preserving smoothing filtering
+
+% step 3: 
+weights2 = [0.05 0.05 0.05 0.05 0.05];
