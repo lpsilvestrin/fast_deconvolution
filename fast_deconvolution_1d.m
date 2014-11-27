@@ -1,11 +1,12 @@
 function deconvolved = fast_deconvolution_1d(img, kernel)
 % deconvolve 1d image
 % step 1
-
+[rows cols] = size(img);
 weights1 = [0.001 0.001 0.001 0.001 0.001];
+sobelx = [[-1 0 1]; [-2 0 2]; [-1 0 1]];
+sobely = [-1 -2 -1; 0 0 0; 1 2 1];
 % finding derivatives
-dx = diff(img, 1, 2);
-dx = padarray(dx, [0,1], 0, 'post'); 
+dx = (conv2(img, double(sobelx)))(3:rows+2,3:cols+2);
 dxx = diff(dx, 1, 2);
 dxx = padarray(dxx, [0,1], 0, 'post'); 
 dy = diff(img, 1, 1);
