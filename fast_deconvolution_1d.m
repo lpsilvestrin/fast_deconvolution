@@ -31,4 +31,5 @@ A = A + weights(2)*DYC .* DY;
 A = A + weights(3)*DXXC .* DXX;
 A = A + weights(4)*DYYC .* DYY;
 A = A + weights(5)*DXYC .* DXY;
-B = HC .* G;
+B = HC .* G; % B is just HC .* G since Ws = 0
+
