@@ -12,7 +12,7 @@ H = fft2(h, rows, cols);
 % Degraded image
 
 g = conv2(double(f), h);
-G = fft2(g, rows, cols);
+G = fft2(f) .* H;
 
 % derivative of image
 sobelV = fspecial('sobel');
@@ -22,8 +22,10 @@ prewittV = transpose(prewittH);
 %dx = (conv2(g, sobelH))(3 : rows + 2, 3 : cols + 2);
 %dy = (conv2(g, sobelV))(3 : rows + 2, 3 : cols + 2);
 dx = sobelH;
+DX = fft2(dx, rows, cols);
 dy = sobelV;
-derivs = fillDerivs(dx, dy, rows, cols);
+DY = fft2(dy, rows, cols);
+derivs = fillDerivs(DX, DX, rows, cols);
 %derivs = fillDerivs(prewittH, prewittV, rows, cols);
 
 % lambda array in equation
