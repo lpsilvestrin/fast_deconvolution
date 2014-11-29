@@ -19,7 +19,7 @@ g = conv2(double(f), h);
 G = fft2(g, rows, cols);
 
 % lambda array in equation
-weights1 = 0.001 * zeros(1, 5);
+weights1 = 0.001 * ones(1, 5);
 
 A = conj(H) .* H;
 for i = 1 : 5
