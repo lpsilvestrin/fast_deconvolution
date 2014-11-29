@@ -19,8 +19,6 @@ derivs(:, :, 5) = fft2(double(conv2(sobelH, sobelV)), rows, cols); % dxy
 % Degrading function and its transforms
 h = kernel1;
 H = fft2(h, rows, cols);
-H_i = imag(H);
-
 
 % Degraded image
 
@@ -30,18 +28,18 @@ G = fft2(g, rows, cols);
 % lambda array in equation
 weights1 = 0.001 * zeros(1, 5);
 
-A = H_i .* H;
+A = conj(H) .* H;
 for i = 1 : 5
-    M = weights1(i) * (imag(derivs(:, :, i)) .* derivs(:, :, i));
+    M = weights1(i) * (conj(derivs(:, :, i)) .* derivs(:, :, i));
     A += M;
 end;
 
 w = zeros(rows, cols, 5);
 W = fft2(w);
 
-B = H_i .* G;
+B = conj(H) .* G;
 for i = 1 : 5
-    M = weights1(i) * (imag(derivs(:, :, i)) .* W(:, :, i));
+    M = weights1(i) * (conj(derivs(:, :, i)) .* W(:, :, i));
     B += M;
 end;
 
