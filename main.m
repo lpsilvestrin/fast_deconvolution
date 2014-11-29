@@ -35,6 +35,11 @@ w = zeros(rows, cols, 5);
 W = fft2(w);
 
 B = conj(H) .* G;
+
+f0 = ifft2(B ./ A);
+sigma_s = 60;
+sigma_r = 0.4;
+f1 = NC(f0, sigma_s, sigma_r);
 %{
 for i = 1 : 5
     S = weights1(i) * (conj(derivs(:, :, i)) .* W(:, :, i));
