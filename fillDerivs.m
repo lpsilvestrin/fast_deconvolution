@@ -1,5 +1,6 @@
 % Generate matrix containing all needed derivatives from the image
-function derivs = fillDerivs(dx, dy, rows, cols)
+function derivs = fillDerivs(dx, dy)
+    [rows, cols] = size(dx); %assuming same size for both dx and dy
     derivs = zeros(rows, cols, 5);
     derivs(:, :, 1) = fft2(double(dx), rows, cols);            % dx
     derivs(:, :, 2) = fft2(double(dy), rows, cols);            % dy

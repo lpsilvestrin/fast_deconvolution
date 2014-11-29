@@ -4,15 +4,6 @@ f = imread('cameraman.jpg');
 
 [rows, cols, chans] = size(f);
 
-% derivative of image
-sobelV = fspecial('sobel');
-sobelH = transpose(sobelV);
-prewittH = fspecial('prewitt');
-prewittV = transpose(prewittH);
-dx = (conv2(f, sobelH))(3 : rows + 2, 3 : cols + 2);
-dy = (conv2(f, sobelV))(3 : rows + 2, 3 : cols + 2);
-derivs = fillDerivs(dx, dy, rows, cols);
-%derivs = fillDerivs(prewittH, prewittV, rows, cols);
 
 % Degrading function and its transforms
 h = kernel1;
@@ -22,6 +13,16 @@ H = fft2(h, rows, cols);
 
 g = conv2(double(f), h);
 G = fft2(g, rows, cols);
+
+% derivative of image
+sobelV = fspecial('sobel');
+sobelH = transpose(sobelV);
+prewittH = fspecial('prewitt');
+prewittV = transpose(prewittH);
+dx = (conv2(g, sobelH))(3 : rows + 2, 3 : cols + 2);
+dy = (conv2(g, sobelV))(3 : rows + 2, 3 : cols + 2);
+derivs = fillDerivs(dx, dy, rows, cols);
+%derivs = fillDerivs(prewittH, prewittV, rows, cols);
 
 % lambda array in equation
 weights1 = 0.001 * ones(1, 5);
