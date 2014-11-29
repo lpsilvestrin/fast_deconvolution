@@ -9,7 +9,9 @@ sobelV = fspecial('sobel');
 sobelH = transpose(sobelV);
 prewittH = fspecial('prewitt');
 prewittV = transpose(prewittH);
-derivs = fillDerivs(sobelH, sobelV, rows, cols);
+dx = (conv2(f, sobelH))(3 : rows + 2, 3 : cols + 2);
+dy = (conv2(f, sobelV))(3 : rows + 2, 3 : cols + 2);
+derivs = fillDerivs(dx, dy, rows, cols);
 %derivs = fillDerivs(prewittH, prewittV, rows, cols);
 
 % Degrading function and its transforms
