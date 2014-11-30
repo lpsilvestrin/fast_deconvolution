@@ -1,6 +1,7 @@
-function result = deconvolve(G, H, weights, w_set)
-    [rows, cols, chans] = size(G);
+function result = deconvolve(g, H, weights, w_set)
+    [rows, cols, chans] = size(g);
 
+    G = fft2(g);
     result = zeros(rows, cols);
     % derivative set
     derivs = getA1(rows, cols);
