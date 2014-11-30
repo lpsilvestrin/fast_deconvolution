@@ -1,6 +1,6 @@
 load 'kernels.mat';
 
-f = imread('cameraman.jpg');
+f = imread('cameraman.bmp');
 
 [rows, cols, chans] = size(f);
 
