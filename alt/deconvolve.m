@@ -1,19 +1,14 @@
-function result = deconvolve(g, H, weights, w_set)
-    [rows, cols, chans] = size(g);
-    G = fft2(g);
+function result = deconvolve(G, H, weights, w_set)
+    [rows, cols, chans] = size(G);
 
     % derivative set
-    dy = fspecial('sobel');
-    dx = transpose(dy);
+    sobelV = fspecial('sobel');
+    sobelH = transpose(sobelV);
+    dx = sobelH;
     DX = fft2(dx, rows, cols);
+    dy = sobelV;
     DY = fft2(dy, rows, cols);
-    derivs = zeros(rows, cols, 5);
-    derivs(:, :, 1) = DX;
-    derivs(:, :, 2) = DY;            % dy
-    derivs(:, :, 3) = DX .* DX; % dxx
-    derivs(:, :, 4) = DY .* DY; % dyy
-    derivs(:, :, 5) = DX .* DY; % dxy
-
+    derivs = fillDerivs(DX, DX, rows, cols);
 
     A = conj(H) .* H;
     for i = 1 : 5
