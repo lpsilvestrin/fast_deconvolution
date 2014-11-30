@@ -30,7 +30,7 @@ function result = deconvolve(g, H, weights, w_set)
     for i = 1 : 5
 %        S = weights(i) * (conj(derivs(:, :, i)) .* W(:, :, i));
         b1 = get_b1(result);
-        S = weights(i) .*  fft2(b1);
+        S = weights(i) .*  real(fft2(b1));
         B += S;
     end;
 
