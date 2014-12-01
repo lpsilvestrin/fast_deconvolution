@@ -36,6 +36,23 @@ function result = deconvolve(g, H, weights, w_set)
     derivs(:, :, 4) = DYY; % dyy
     derivs(:, :, 5) = DXY; % dxy
 
+    A = conj(H) .* H;
+    for i = 1 : 5
+        S = weights(i) .* (conj(derivs(:, :, i)) .* derivs(:, :, i));
+%        S = weights(i) .* (conj(derivs) .* derivs); %derivs(:, :, i));
+        A += S;
+    end;
+
+    W = zeros(rows, cols, 5);
+    W = fft2(w_set);
+
+    B = conj(H) .* G;
+    for i = 1 : 5
+        S = weights(i) .* (conj(derivs(:, :, i)) .* W(:, :, i));
+        B += S;
+    end;
+    result = ifft2(B ./ A);
+
     %{
     dy = fspecial('sobel');
     dx = transpose(dy);
@@ -49,27 +66,4 @@ function result = deconvolve(g, H, weights, w_set)
     derivs(:, :, 5) = DX .* DY; % dxy
     %}
 
-    A = conj(H) .* H;
-    for i = 1 : 5
-        S = weights(i) .* (conj(derivs(:, :, i)) .* derivs(:, :, i));
-%        S = weights(i) .* (conj(derivs) .* derivs); %derivs(:, :, i));
-        A += S;
-    end;
 
-    W = zeros(rows, cols, 5);
-%    disp(size(w_set));
-%j    for i = 1 : 5
- %       W(:, :, i) = fft2(w_set(:, :, i), rows, cols);
- %   endfor;
-    W = fft2(w_set);
-
-
-    B = conj(H) .* G;
-    for i = 1 : 5
-        S = weights(i) .* (conj(derivs(:, :, i)) .* W(:, :, i));
-%        b1 = get_b1(w_set(:, :, i));
-%        W = fft2(b1);
-%        S = weights(i) .*  fft2(b1);
-        B += S;
-    end;
-    result = ifft2(B ./ A);
