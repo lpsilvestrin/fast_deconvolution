@@ -21,9 +21,10 @@ f0 = deconvolve(gn, H, weights1, fft2(zeros(rows, cols, 5)));
 
 %% STEP 2
 
-sigma_s = 60;
+sigma_s = 30;
 sigma_r = 0.3;
 f1 = RF(im2double(uint8(real(f0))), sigma_s, sigma_r);
+%f1 = imsmooth(im2double(uint8(real(f0))), 'Bilateral');
 f1 = im2uint8(f1);
 
 %% STEP 3
