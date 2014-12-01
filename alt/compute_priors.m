@@ -1,18 +1,6 @@
 function ws = compute_priors(f)
     [rows, cols] = size(f);
 
-    ws = zeros(rows, cols);
-    derivs = getA1(rows, cols);
-    F = fft2(f);
-    numer = derivs .* F;
-    threshold = 0.0325;
-    denom = threshold ./ numer;
-    denom = denom .^ 4 + 1;
-
-    ws(:, :) = numer ./ denom;
-
-
-    %{
     dy = fspecial('sobel');
     dx = transpose(dy);
     DX = fft2(dx);
@@ -29,15 +17,28 @@ function ws = compute_priors(f)
 
     threshold = 0.065;
     for i = 1 : 2
-        der = conv2(fst_derivs(:, :, i), double(f), 'same');
-        denom = (threshold ./ der) ^ 4 + 1;
+        der = conv2(double(f), fst_derivs(:, :, i), 'same');
+        denom = (threshold ./ der) .^ 4 + 1;
         ws(:, :, i) = der ./ denom;
     end
 
     threshold = 0.0325;
     for i = 1 : 3
-        der = conv2(snd_derivs(:, :, i), double(f), 'same');
-        denom = (threshold ./ der) ^ 4 + 1;
+        der = conv2(double(f), snd_derivs(:, :, i), 'same');
+        denom = (threshold ./ der) .^ 4 + 1;
         ws(:, :, i + 2) = der ./ denom;
     end
+    %{
+    ws = zeros(rows, cols);
+    derivs = getA1(rows, cols);
+    F = fft2(f);
+    numer = derivs .* F;
+    threshold = 0.0325;
+    denom = threshold ./ numer;
+    denom = denom .^ 4 + 1;
+
+    ws(:, :) = numer ./ denom;
     %}
+
+
+

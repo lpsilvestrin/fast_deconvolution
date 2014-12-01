@@ -17,7 +17,7 @@ gn = imnoise(g, 'gaussian', 0.1, 50);
 % lambda array in equation
 weights1 = 0.001 * ones(1, 5);
 
-f0 = deconvolve(gn, H, weights1, fft2(zeros(rows, cols)));
+f0 = deconvolve(gn, H, weights1, fft2(zeros(rows, cols, 5)));
 
 %% STEP 2
 
