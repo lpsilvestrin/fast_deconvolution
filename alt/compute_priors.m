@@ -1,5 +1,24 @@
 function ws = compute_priors(f)
     [rows, cols] = size(f);
+
+    ws = zeros(1, 5);
+    derivs = getA1(rows, cols);
+    F = fft2(f);
+    for i = 1 : 5
+        numer = derivs .* f;
+        if (i < 3)
+            threshold = 0.065;
+        else
+            threshold = 0.0325;
+        endif;
+        denom = threshold ./ numer;
+        denom = denom .^ 4 + 1;
+        ws(1, i) = numer ./ denom;
+    endfor;
+
+
+
+    %{
     dy = fspecial('sobel');
     dx = transpose(dy);
     DX = fft2(dx);
@@ -27,3 +46,4 @@ function ws = compute_priors(f)
         denom = (threshold ./ der) ^ 4 + 1;
         ws(:, :, i + 2) = der ./ denom;
     end
+    %}

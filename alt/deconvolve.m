@@ -21,16 +21,18 @@ function result = deconvolve(g, H, weights, w_set)
     A = conj(H) .* H;
     for i = 1 : 5
 %        S = weights(i) * (conj(derivs(:, :, i)) .* derivs); %derivs(:, :, i));
-        S = weights(i) .* derivs; %derivs(:, :, i));
+        S = weights(i) .* (conj(derivs) .* derivs); %derivs(:, :, i));
         A += S;
     end;
 
-    W = fft2(w_set);
+    %W = fft2(w_set, rows, cols);
+
     B = conj(H) .* G;
     for i = 1 : 5
 %        S = weights(i) * (conj(derivs(:, :, i)) .* W(:, :, i));
-        b1 = get_b1(result);
-        S = weights(i) .*  real(fft2(b1));
+        b1 = get_b1(w_set);
+        W = fft2(b1);
+        S = weights(i) .*  W;
         B += S;
     end;
 
