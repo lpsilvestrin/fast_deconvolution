@@ -5,7 +5,7 @@ function result = deconvolve(g, H, weights, w_set)
     result = zeros(rows, cols);
     % derivative set
     derivs = getA1(rows, cols);
-   %{ 
+    %{
     dy = fspecial('sobel');
     dx = transpose(dy);
     DX = fft2(dx, rows, cols);
@@ -20,7 +20,7 @@ function result = deconvolve(g, H, weights, w_set)
 
     A = conj(H) .* H;
     for i = 1 : 5
-        S = weights(i) .* (conj(derivs) .* derivs); %derivs(:, :, i));
+        S = weights(i) .* (conj(derivs) .* derivs);%(:, :, i));
 %        S = weights(i) .* (conj(derivs) .* derivs); %derivs(:, :, i));
         A += S;
     end;
