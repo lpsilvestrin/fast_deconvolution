@@ -1,5 +1,6 @@
 function ws = compute_priors(f)
-    [rows, cols] = size(f);
+
+	[rows, cols] = size(f);
 
     dy = fspecial('sobel');
     dx = transpose(dy);
@@ -28,6 +29,8 @@ function ws = compute_priors(f)
         denom = (threshold ./ der) .^ 4 + 1;
         ws(:, :, i + 2) = der ./ denom;
     end
+
+
     %{
     ws = zeros(rows, cols);
     derivs = getA1(rows, cols);
