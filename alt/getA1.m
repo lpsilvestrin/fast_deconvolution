@@ -31,4 +31,5 @@ a1 = zeros(R, C);
 
 
 % A1 = real(fft2(a1));
- A1 = a1;
+    A1 = fft2(a1);
+% A1 = a1;
