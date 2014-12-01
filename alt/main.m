@@ -29,7 +29,10 @@ f1 = im2uint8(f1);
 %% STEP 3
 %% compute regularization priors
 ws = compute_priors(f1);
+<<<<<<< HEAD
 
 %%ws = find_params_new(h, f1);
 %%ws = get_b1(f1);
+=======
+>>>>>>> 55af0dc5b9e92f68880319063fa4b96c4a036903
 f2 = deconvolve(f1, H, 0.05 * ones(1, 5), uint8(ws));

@@ -2,7 +2,6 @@ function ws = compute_priors(f)
 
 	[rows, cols] = size(f);
 
-    
     dx   = [-0.5, 0, 0.5];
     dy   = [-0.5; 0; 0.5];
     dxx  = [-1 / 1.4142, 2 / 1.4142, -1 / 1.4142];
@@ -15,12 +14,6 @@ function ws = compute_priors(f)
     dyy = rot90(dyy,2);
     dxy = rot90(dxy,2); 
     
-    conj_dx  = rot90(dx,2 ); %rot 180 deg, same as flipud(fliplr(dx));    
-    conj_dy  = rot90(dy,2 );
-    conj_dxx = rot90(dxx,2);
-    conj_dyy = rot90(dyy,2);
-    conj_dxy = rot90(dxy,2);    
-
     threshold1 = 0.065;
     threshold2 = 0.0325;
     ws(:, :, 1) = calc_ratio(f, dx, threshold1);
@@ -29,6 +22,12 @@ function ws = compute_priors(f)
     ws(:, :, 4) = calc_ratio(f, dyy, threshold2);
     ws(:, :, 5) = calc_ratio(f, dxy, threshold2);
     
+
+function ratio = calc_ratio(f, der, threshold)
+    numer = conv2(double(f), der, 'same');
+    denom = (threshold ./ numer) .^ 4 + 1;
+    ratio = numer ./ denom;
+
 
     %{
     dy = fspecial('sobel');
@@ -68,7 +67,4 @@ function ws = compute_priors(f)
     ws(:, :) = numer ./ denom;
     %}
 
-function ratio = calc_ratio(f, der, threshold)
-    der = conv2(double(f), der, 'same');
-    denom = (threshold ./ der) .^ 4 + 1;
-    ratio = der ./ denom;
+
