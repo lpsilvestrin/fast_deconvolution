@@ -12,7 +12,7 @@ H = fft2(h, rows, cols);
 
 G = fft2(f) .* H;
 g = ifft2(G);
-gn = imnoise(g, 'gaussian', 0.1, 50);
+gn = imnoise(g, 'gaussian', 0.04, 30);
 
 % lambda array in equation
 weights1 = 0.001 * ones(1, 5);
@@ -21,10 +21,9 @@ f0 = deconvolve(gn, H, weights1, fft2(zeros(rows, cols, 5)));
 
 %% STEP 2
 
-sigma_s = 30;
-sigma_r = 0.3;
-f1 = RF(im2double(uint8(real(f0))), sigma_s, sigma_r);
-%f1 = imsmooth(im2double(uint8(real(f0))), 'Bilateral');
+sigma_s = 20;
+sigma_r = 0.133;
+f1 = our_RF(im2double(uint8(real(f0))), sigma_s, sigma_r);
 f1 = im2uint8(f1);
 
 %% STEP 3
