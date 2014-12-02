@@ -1,23 +1,28 @@
 load 'kernels.mat';
 
-f = imread('reef.jpg');
+f = imread('cameraman.bmp');
 h = kernel1;
 pad_amount = 2 * length(h);
-f = padding(f, pad_amount);
 
+% generate gn degraded without pad 
 [rows, cols, chans] = size(f);
+g = zeros(size(f));
+for c = 1 : chans
+    g(:, :, c) = conv2(double(f(:, :, c)), h, 'same');
+end;
+gn = imnoise(g, 'gaussian', 0.04, 10);
+%%%%%%%%% gn generated %%%%%%%%
+
+% Padding gn
+
+gn = padding(gn, pad_amount);
+[rows, cols, chans] = size(gn);
 
 % Degrading function and its transforms
 h_big = getBigKernel(rows, cols, h);
 H = fft2(h_big);
 
 % Degraded image
-
-for c = 1 : chans
-    g(:, :, c) = conv2(double(f(:, :, c)), h, 'same');
-endfor;
-G = fft2(g);
-gn = imnoise(g, 'gaussian', 0.04, 10);
 
 % lambda array in equation
 weights1 = 0.001 * ones(1, 5);
