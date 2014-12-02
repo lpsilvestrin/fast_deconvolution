@@ -1,68 +1,93 @@
-function result = deconvolve(g, H, weights, w_set)
-    [rows, cols, chans] = size(g);
+function deconvolve(file)
 
-    G = fft2(g);
-    temp_out = zeros(rows, cols);
-    % derivative set
-%    derivs = getA1(rows, cols);
+    load 'kernels.mat';
 
-    dx   = [-0.5, 0, 0.5];
-    dy   = [-0.5; 0; 0.5];
-    dxx  = [-1 / 1.4142, 2 / 1.4142, -1 / 1.4142];
-    dyy  = [-1 / 1.4142; 2 / 1.4142; -1 / 1.4142]; 
-    dxy  = [-1.4142, 1.4142, 0; 1.4142, -1.4142, 0 ; 0, 0, 0];
+    if (!file)
+        file = 'cameraman.jpg';
+    endif;
+    f = imread(file);
+    [f_rows, f_cols, chans] = size(f);
 
-    dx  = rot90(dx,2 ); %rot 180 deg, same as flipud(fliplr(dx));    
-    dy  = rot90(dy,2 );
-    dxx = rot90(dxx,2);
-    dyy = rot90(dyy,2);
-    dxy = rot90(dxy,2); 
-    
-    conj_dx  = rot90(dx,2 ); %rot 180 deg, same as flipud(fliplr(dx));    
-    conj_dy  = rot90(dy,2 );
-    conj_dxx = rot90(dxx,2);
-    conj_dyy = rot90(dyy,2);
-    conj_dxy = rot90(dxy,2);    
+    h = kernel1;
+    pad_amount = 2 * length(h);
 
-    A0 = conj(H) .* H;
-    A1 = getA1(rows, cols);
+    %padding for degrading function
+    [f_padded, mask] = padding(f, pad_amount);
+
+    % generate gn degraded without pad 
+    g0 = zeros(size(f_padded));
     for c = 1 : chans
-        B0 = conj(H) .* G(:, :, c);
-        for i = 1 : 5
-            A = A0 + weights(i) .* A1;
-            B = B0;
-            if (i > 1)
-                b1 = get_b1(temp_out);
-                B = B0 + weights(i) .* fft2(b1);
-            endif;
-    %        S = weights(i) .* (conj(derivs(:, :, i)) .* derivs(:, :, i));
-    %        S = weights(i) .* (conj(derivs) .* derivs); %derivs(:, :, i));
-    %        A += S;
-            temp_out = real(ifft2(B ./ A));
-        endfor;
-        result(:, :, c) = temp_out;
-
-    endfor;
-%{
-    W = fft2(w_set);
-
-    for i = 1 : 5
-        S = weights(i) .* (conj(derivs(:, :, i)) .* W(:, :, i));
-        B += S;
+        g0(:, :, c) = conv2(double(f_padded(:, :, c)), h, 'same');
     end;
-    %}
+    % clear borders
+    for c = 1 : chans
+        g0(:,:,c) = g0(:,:,c) ./ mask;
+    endfor;
+    % remove degrading function's padding
+    g = g0(pad_amount : f_rows + pad_amount,
+            pad_amount : f_cols + pad_amount,
+            :);
 
-    %{
-    dy = fspecial('sobel');
-    dx = transpose(dy);
-    DX = fft2(dx, rows, cols);
-    DY = fft2(dy, rows, cols);
-    derivs = zeros(rows, cols, 5);
-    derivs(:, :, 1) = DX;
-    derivs(:, :, 2) = DY;            % dy
-    derivs(:, :, 3) = DX .* DX; % dxx
-    derivs(:, :, 4) = DY .* DY; % dyy
-    derivs(:, :, 5) = DX .* DY; % dxy
-    %}
+    gn = imnoise(g, 'gaussian', 0, 0.1);
+    %gn = g + randn(rows, cols, chans) * 0.3;
+    %%%%%%%%% gn generated %%%%%%%%
+
+    % actually padding for deconvolution process
+    [gn, mask] = padding(gn, pad_amount);
+    [rows, cols, chans] = size(gn);
+
+    % Degrading function and its transforms
+    h_big = getBigKernel(rows, cols, h);
+    H = fft2(h_big);
+
+    % Degraded image
+
+    weight1 = 0.001;
+
+    A0 = real(conj(H) .* H);
+    A1 = getA1(rows, cols);
+    A10 = A0 + weight1 .* A1;
+    f0 = zeros(rows, cols, chans);
+    B0 = zeros(rows, cols, chans);
+    for c = 1 : chans
+        B0(:,:,c) = conj(H) .* fft2(gn(:,:,c));
+        f0(:,:,c) = real(ifft2(B0(:,:,c) ./ A10));
+    endfor;
+
+    %f0 = deconvolve(gn, H, weights1, fft2(zeros(rows, cols, 5)));
+
+    %% STEP 2
+
+    sigma_s = 60;
+    sigma_r = 0.04;
+    f1 = our_RF(im2double(uint8(real(f0))), sigma_s, sigma_r);
+    f1 = im2uint8(f1);
+
+    %% STEPS 3 and 4
+    weight2 = 0.05;
+    A12  = A0 + weight2 .* A1;
+    f2 = zeros(rows, cols, chans);
+    for c = 1 : chans 
+        %% compute regularization priors
+        reg_terms = comp_reg_terms(f1(:, :, c));
+        %% and adds them
+        B = B0(:, :, c) + weight2 .* fft2(reg_terms);    
+        f2(:,:,c)  = real(ifft2(B ./ A12)); 
+    end;
+
+    %% Remove padding
+    for i=1:chans
+        f2b(:,:,i) = f2(:,:,i) ./ mask;
+    end
+
+    f3 = f2b(pad_amount : f_rows + pad_amount ,
+            pad_amount : f_cols + pad_amount,
+            :);
 
 
+    imwrite(uint8(real(g)), 'g.jpg');
+    imwrite(uint8(real(gn)), 'gn.jpg');
+    imwrite(uint8(real(f0)), 'f0.jpg');
+    imwrite(uint8(real(f1)), 'f1.jpg');
+    imwrite(uint8(real(f2)), 'f2.jpg');
+    imwrite(uint8(real(f3)), 'f3.jpg');
