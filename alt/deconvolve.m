@@ -2,7 +2,7 @@ function result = deconvolve(g, H, weights, w_set)
     [rows, cols, chans] = size(g);
 
     G = fft2(g);
-    result = zeros(rows, cols);
+    temp_out = zeros(rows, cols);
     % derivative set
 %    derivs = getA1(rows, cols);
 
@@ -26,19 +26,23 @@ function result = deconvolve(g, H, weights, w_set)
 
     A0 = conj(H) .* H;
     A1 = getA1(rows, cols);
-    B0 = conj(H) .* G;
-    for i = 1 : 5
-        A = A0 + weights(i) .* A1;
-        if (i > 1)
-            b1 = get_b1(result);
-            B = B0 + weights(i) .* fft2(b1);
-        endif;
-%        S = weights(i) .* (conj(derivs(:, :, i)) .* derivs(:, :, i));
-%        S = weights(i) .* (conj(derivs) .* derivs); %derivs(:, :, i));
-%        A += S;
-    end;
+    for c = 1 : chans
+        B0 = conj(H) .* G(:, :, c);
+        for i = 1 : 5
+            A = A0 + weights(i) .* A1;
+            B = B0;
+            if (i > 1)
+                b1 = get_b1(temp_out);
+                B = B0 + weights(i) .* fft2(b1);
+            endif;
+    %        S = weights(i) .* (conj(derivs(:, :, i)) .* derivs(:, :, i));
+    %        S = weights(i) .* (conj(derivs) .* derivs); %derivs(:, :, i));
+    %        A += S;
+            temp_out = real(ifft2(B ./ A));
+        endfor;
+        result(:, :, c) = temp_out;
 
-    result = real(ifft2(B ./ A));
+    endfor;
 %{
     W = fft2(w_set);
 
