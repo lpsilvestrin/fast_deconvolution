@@ -5,7 +5,6 @@ h = kernel1;
 pad_amount = 2 * length(h);
 
 % generate gn degraded without pad 
-[rows, cols, chans] = size(f);
 g = zeros(size(f));
 for c = 1 : chans
     g(:, :, c) = conv2(double(f(:, :, c)), h, 'same');
