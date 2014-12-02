@@ -1,6 +1,6 @@
 load 'kernels.mat';
 
-f = imread('square.jpg');
+f = imread('landscapes-13.jpg');
 [rows, cols, chans] = size(f);
 
 h = kernel1;
@@ -60,11 +60,9 @@ for c = 1 : chans
 end;
 
 %% Remove padding
-%{
 for i=1:chans
 	f2(:,:,i) = f2(:,:,i) ./ mask;
 end
-%}
 f3 = f2(pad_amount : rows - pad_amount,
         pad_amount : cols - pad_amount,
         :);
