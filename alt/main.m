@@ -1,22 +1,23 @@
 load 'kernels.mat';
 
 f = imread('cameraman.jpg');
-[rows, cols, chans] = size(f);
+[f_rows, f_cols, chans] = size(f);
 
 h = kernel1;
 pad_amount = 2 * length(h);
 
-f = padding(f, pad_amount);
-[rows, cols, chans] = size(f);
+f_padded = padding(f, pad_amount);
 % generate gn degraded without pad 
-g = zeros(size(f));
+g = zeros(size(f_padded));
 for c = 1 : chans
-    g(:, :, c) = conv2(double(f(:, :, c)), h, 'same');
+    g(:, :, c) = conv2(double(f_padded(:, :, c)), h, 'same');
 end;
-gn = imnoise(g, 'gaussian', 0, 1);
+gn = imnoise(g, 'gaussian', 0, 0.1);
 %gn = g + randn(rows, cols, chans) * 0.3;
 %%%%%%%%% gn generated %%%%%%%%
 
+gn = padding(gn, pad_amount);
+[rows, cols, chans] = size(gn);
 
 % Degrading function and its transforms
 h_big = getBigKernel(rows, cols, h);
@@ -59,10 +60,13 @@ for c = 1 : chans
 end;
 
 %% Remove padding
-f3 = f2(pad_amount : rows - pad_amount,
-        pad_amount : cols - pad_amount,
+pad_amount *= 2;
+f3 = f2(pad_amount : f_rows + pad_amount ,
+        pad_amount : f_cols + pad_amount,
         :);
+        disp(size(f3));
 
+imwrite(uint8(real(g)), 'g.jpg');
 imwrite(uint8(real(gn)), 'gn.jpg');
 imwrite(uint8(real(f0)), 'f0.jpg');
 imwrite(uint8(real(f1)), 'f1.jpg');
