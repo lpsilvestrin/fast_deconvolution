@@ -1,6 +1,6 @@
 load 'kernels.mat';
 
-f = imread('landscapes-13.jpg');
+f = imread('square.jpg');
 [rows, cols, chans] = size(f);
 
 h = kernel1;
@@ -31,6 +31,7 @@ A0 = real(conj(H) .* H);
 A1 = getA1(rows, cols);
 A10 = A0 + weight1 .* A1;
 f0 = zeros(rows, cols, chans);
+B0 = zeros(rows, cols, chans);
 for c = 1 : chans
     B0(:,:,c) = conj(H) .* fft2(gn(:,:,c));
     f0(:,:,c) = real(ifft2(B0(:,:,c) ./ A10));
