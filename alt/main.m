@@ -13,8 +13,8 @@ g = zeros(size(f));
 for c = 1 : chans
     g(:, :, c) = conv2(double(f(:, :, c)), h, 'same');
 end;
-%gn = imnoise(g, 'gaussian', 0.04, 10);
-gn = g + randn(rows, cols, chans) * 0.01;
+gn = imnoise(g, 'gaussian', 0, 1);
+%gn = g + randn(rows, cols, chans) * 0.3;
 %%%%%%%%% gn generated %%%%%%%%
 
 
