@@ -1,12 +1,12 @@
 load 'kernels.mat';
 
-f = imread('cameraman.jpg');
+f = imread('landscapes-13.jpg');
 [rows, cols, chans] = size(f);
 
 h = kernel1;
 pad_amount = 2 * length(h);
 
-f = padding(f, pad_amount);
+[f, mask] = padding(f, pad_amount);
 [rows, cols, chans] = size(f);
 % generate gn degraded without pad 
 g = zeros(size(f));
@@ -59,6 +59,11 @@ for c = 1 : chans
 end;
 
 %% Remove padding
+%{
+for i=1:chans
+	f2(:,:,i) = f2(:,:,i) ./ mask;
+end
+%}
 f3 = f2(pad_amount : rows - pad_amount,
         pad_amount : cols - pad_amount,
         :);
