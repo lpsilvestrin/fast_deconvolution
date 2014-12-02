@@ -6,17 +6,23 @@ f = imread('cameraman.jpg');
 h = kernel1;
 pad_amount = 2 * length(h);
 
-f_padded = padding(f, pad_amount);
+[f_padded, mask] = padding(f, pad_amount);
 % generate gn degraded without pad 
-g = zeros(size(f_padded));
+g0 = zeros(size(f_padded));
 for c = 1 : chans
-    g(:, :, c) = conv2(double(f_padded(:, :, c)), h, 'same');
+    g0(:, :, c) = conv2(double(f_padded(:, :, c)), h, 'same');
 end;
+for c = 1 : chans
+    g0(:,:,c) = g0(:,:,c) ./ mask;
+endfor;
+g = g0(pad_amount : f_rows + pad_amount,
+        pad_amount : f_cols + pad_amount,
+        :);
 gn = imnoise(g, 'gaussian', 0, 0.1);
 %gn = g + randn(rows, cols, chans) * 0.3;
 %%%%%%%%% gn generated %%%%%%%%
 
-gn = padding(gn, pad_amount);
+[gn, mask] = padding(gn, pad_amount);
 [rows, cols, chans] = size(gn);
 
 % Degrading function and its transforms
@@ -32,6 +38,7 @@ A0 = real(conj(H) .* H);
 A1 = getA1(rows, cols);
 A10 = A0 + weight1 .* A1;
 f0 = zeros(rows, cols, chans);
+B0 = zeros(rows, cols, chans);
 for c = 1 : chans
     B0(:,:,c) = conj(H) .* fft2(gn(:,:,c));
     f0(:,:,c) = real(ifft2(B0(:,:,c) ./ A10));
@@ -60,11 +67,14 @@ for c = 1 : chans
 end;
 
 %% Remove padding
-pad_amount *= 2;
-f3 = f2(pad_amount : f_rows + pad_amount ,
+for i=1:chans
+	f2b(:,:,i) = f2(:,:,i) ./ mask;
+end
+
+f3 = f2b(pad_amount : f_rows + pad_amount ,
         pad_amount : f_cols + pad_amount,
         :);
-        disp(size(f3));
+
 
 imwrite(uint8(real(g)), 'g.jpg');
 imwrite(uint8(real(gn)), 'gn.jpg');
