@@ -23,35 +23,30 @@ function result = deconvolve(g, H, weights, w_set)
     conj_dxx = rot90(dxx,2);
     conj_dyy = rot90(dyy,2);
     conj_dxy = rot90(dxy,2);    
-    derivs = zeros(rows, cols, 5);
 
-    DX = fft2(dx, rows, cols);
-    DY = fft2(dy, rows, cols);
-    DXX = fft2(dxx, rows, cols);
-    DYY = fft2(dyy, rows, cols);
-    DXY = fft2(dxy, rows, cols);
-    derivs(:, :, 1) = DX;
-    derivs(:, :, 2) = DY;            % dy
-    derivs(:, :, 3) = DXX; % dxx
-    derivs(:, :, 4) = DYY; % dyy
-    derivs(:, :, 5) = DXY; % dxy
-
-    A = conj(H) .* H;
+    A0 = conj(H) .* H;
+    A1 = getA1(rows, cols);
+    B0 = conj(H) .* G;
     for i = 1 : 5
-        S = weights(i) .* (conj(derivs(:, :, i)) .* derivs(:, :, i));
+        A = A0 + weights(i) .* A1;
+        if (i > 1)
+            b1 = get_b1(result);
+            B = B0 + weights(i) .* fft2(b1);
+        endif;
+%        S = weights(i) .* (conj(derivs(:, :, i)) .* derivs(:, :, i));
 %        S = weights(i) .* (conj(derivs) .* derivs); %derivs(:, :, i));
-        A += S;
+%        A += S;
     end;
 
-    W = zeros(rows, cols, 5);
+    result = real(ifft2(B ./ A));
+%{
     W = fft2(w_set);
 
-    B = conj(H) .* G;
     for i = 1 : 5
         S = weights(i) .* (conj(derivs(:, :, i)) .* W(:, :, i));
         B += S;
     end;
-    result = ifft2(B ./ A);
+    %}
 
     %{
     dy = fspecial('sobel');

@@ -6,12 +6,13 @@ f = imread('cameraman.jpg');
 
 % Degrading function and its transforms
 h = kernel1;
-H = fft2(h, rows, cols);
+h_big = getBigKernel(rows, cols, h);
+H = fft2(h_big);
 
 % Degraded image
 
-G = fft2(f) .* H;
-g = ifft2(G);
+g = conv2(double(f), h, 'same');
+G = fft2(g);
 gn = imnoise(g, 'gaussian', 0.04, 30);
 
 % lambda array in equation
@@ -28,5 +29,5 @@ f1 = im2uint8(f1);
 
 %% STEP 3
 %% compute regularization priors
-ws = compute_priors(f1);
-f2 = deconvolve(f1, H, 0.1 * ones(1, 5), real(ws));
+%ws = compute_priors(f1);
+f2 = deconvolve(f1, H, 0.1 * ones(1, 5), fft2(zeros(rows, cols, 5)));
